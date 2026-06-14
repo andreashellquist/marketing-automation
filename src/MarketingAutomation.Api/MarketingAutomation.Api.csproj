@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <ItemGroup>
+    <ProjectReference Include="..\MarketingAutomation.Modules.Contacts\MarketingAutomation.Modules.Contacts.csproj" />
+    <ProjectReference Include="..\MarketingAutomation.Modules.Events\MarketingAutomation.Modules.Events.csproj" />
+    <ProjectReference Include="..\MarketingAutomation.Modules.Segments\MarketingAutomation.Modules.Segments.csproj" />
+    <ProjectReference Include="..\MarketingAutomation.Modules.Campaigns\MarketingAutomation.Modules.Campaigns.csproj" />
+    <ProjectReference Include="..\MarketingAutomation.Modules.Journeys\MarketingAutomation.Modules.Journeys.csproj" />
+    <ProjectReference Include="..\MarketingAutomation.Modules.Messaging\MarketingAutomation.Modules.Messaging.csproj" />
+    <ProjectReference Include="..\MarketingAutomation.Modules.Templates\MarketingAutomation.Modules.Templates.csproj" />
+    <ProjectReference Include="..\MarketingAutomation.Modules.Analytics\MarketingAutomation.Modules.Analytics.csproj" />
+    <ProjectReference Include="..\MarketingAutomation.Modules.Ai\MarketingAutomation.Modules.Ai.csproj" />
+    <ProjectReference Include="..\MarketingAutomation.Modules.Platform\MarketingAutomation.Modules.Platform.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" />
+    <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" />
+    <PackageReference Include="Serilog.AspNetCore" />
+    <PackageReference Include="Serilog.Sinks.Seq" />
+  </ItemGroup>
+
+</Project>
