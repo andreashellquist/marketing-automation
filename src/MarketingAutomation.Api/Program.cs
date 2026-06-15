@@ -5,6 +5,9 @@ using MarketingAutomation.Modules.Contacts.Infrastructure;
 using MarketingAutomation.Modules.Events;
 using MarketingAutomation.Modules.Events.Endpoints;
 using MarketingAutomation.Modules.Events.Infrastructure;
+using MarketingAutomation.Modules.Messaging;
+using MarketingAutomation.Modules.Messaging.Endpoints;
+using MarketingAutomation.Modules.Messaging.Infrastructure;
 using MarketingAutomation.Modules.Platform;
 using MarketingAutomation.Modules.Platform.Infrastructure;
 using MarketingAutomation.SharedKernel.Application;
@@ -22,6 +25,7 @@ builder.Host.UseSerilog((context, config) => config
 builder.Services.AddPlatformModule(builder.Configuration);
 builder.Services.AddContactsModule(builder.Configuration);
 builder.Services.AddEventsModule(builder.Configuration);
+builder.Services.AddMessagingModule(builder.Configuration);
 builder.Services.AddSharedApplication();
 
 builder.Services.AddOpenApi();
@@ -38,6 +42,7 @@ if (app.Environment.IsDevelopment())
     await scope.ServiceProvider.GetRequiredService<PlatformDbContext>().Database.MigrateAsync();
     await scope.ServiceProvider.GetRequiredService<ContactsDbContext>().Database.MigrateAsync();
     await scope.ServiceProvider.GetRequiredService<EventsDbContext>().Database.MigrateAsync();
+    await scope.ServiceProvider.GetRequiredService<MessagingDbContext>().Database.MigrateAsync();
 }
 
 app.UseExceptionHandler();
@@ -49,6 +54,7 @@ app.MapHealthChecks("/health");
 app.MapGet("/", () => Results.Ok(new { service = "marketing-automation", status = "ok" }));
 app.MapContactsEndpoints();
 app.MapEventsEndpoints();
+app.MapMessagingEndpoints();
 
 app.Run();
 

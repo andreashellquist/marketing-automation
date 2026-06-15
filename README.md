@@ -22,9 +22,16 @@ What's built:
   cross-channel **suppression** (revoking marketing consent suppresses automatically)
 - `Events`: idempotent **event ingestion** (single + batch) deduped by message id,
   publishing `EventIngested` for downstream fan-out — with no dependency on Contacts
+- `Messaging`: channel-agnostic **send pipeline** with the **policy gate** every message
+  passes through at send time — kill switch, suppression, quiet hours (in recipient
+  timezone), frequency cap — with transactional traffic exempt; **idempotent sends**
+  enforced by a unique dedup-key index; provider abstraction (`IChannelSender`) with a
+  dev logging sender; **DLR/bounce webhook** handling that's idempotent and event-emitting.
+  Cross-module data (consent/suppression, kill switch) flows through **SharedKernel
+  contracts** the owning modules implement — so Messaging references no other module.
 - MassTransit/RabbitMQ, Serilog → Seq, health checks, OpenAPI, ProblemDetails
-- EF Core migrations (PostgreSQL) for `platform`, `contacts`, `events` schemas
-- **36 tests**: 20 arch-boundary + 5 platform + 6 contacts + 5 events (SQLite in-memory)
+- EF Core migrations (PostgreSQL) for `platform`, `contacts`, `events`, `messaging` schemas
+- **48 tests**: 20 arch-boundary + 5 platform + 6 contacts + 5 events + 12 messaging
 - GitHub Actions CI (build + test on every push/PR)
 
 ## Stack
