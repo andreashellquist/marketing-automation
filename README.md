@@ -6,9 +6,9 @@ modular monolith with a React frontend.
 
 ## Status
 
-**Phases 1–2 in progress.** Foundation, the Contacts CDP, and Event ingestion are
-built and tested. See [docs/SPECIFICATION.md](docs/SPECIFICATION.md) for the full
-architecture and build order.
+**Phases 1–4 in progress.** Foundation, the Contacts CDP, Event ingestion, the
+Messaging pipeline, and Campaigns are built and tested. See
+[docs/SPECIFICATION.md](docs/SPECIFICATION.md) for the full architecture and build order.
 
 What's built:
 - Modular-monolith solution: 10 module projects + shared kernel + API host
@@ -29,9 +29,17 @@ What's built:
   dev logging sender; **DLR/bounce webhook** handling that's idempotent and event-emitting.
   Cross-module data (consent/suppression, kill switch) flows through **SharedKernel
   contracts** the owning modules implement — so Messaging references no other module.
+- `Campaigns`: full lifecycle — create/update, content sub-resource, **status state
+  machine** (Draft→Scheduled→Running→Completed, with pause/cancel/archive), scheduling,
+  **batched send** through the Messaging pipeline (one idempotent message per audience
+  member), test sends (transactional, QA-only), and **delivery stats**. Drives sends and
+  audience via SharedKernel contracts (`IAudienceResolver`, `IMessageSender`,
+  `IMessageStatsProvider`) — references no other module.
 - MassTransit/RabbitMQ, Serilog → Seq, health checks, OpenAPI, ProblemDetails
-- EF Core migrations (PostgreSQL) for `platform`, `contacts`, `events`, `messaging` schemas
-- **48 tests**: 20 arch-boundary + 5 platform + 6 contacts + 5 events + 12 messaging
+- EF Core migrations (PostgreSQL) for `platform`, `contacts`, `events`, `messaging`,
+  `campaigns` schemas
+- **55 tests**: 20 arch-boundary + 5 platform + 6 contacts + 5 events + 12 messaging
+  + 7 campaigns
 - GitHub Actions CI (build + test on every push/PR)
 
 ## Stack

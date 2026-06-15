@@ -2,12 +2,6 @@ using MarketingAutomation.SharedKernel;
 
 namespace MarketingAutomation.Modules.Messaging.Domain;
 
-public enum MessagePurpose
-{
-    Marketing = 1,
-    Transactional = 2,
-}
-
 public enum MessageStatus
 {
     /// <summary>Created, not yet handed to a provider.</summary>

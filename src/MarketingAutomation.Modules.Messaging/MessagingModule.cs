@@ -3,6 +3,7 @@ using MarketingAutomation.Modules.Messaging.Application;
 using MarketingAutomation.Modules.Messaging.Domain;
 using MarketingAutomation.Modules.Messaging.Infrastructure;
 using MarketingAutomation.SharedKernel;
+using MarketingAutomation.SharedKernel.Contracts;
 using MarketingAutomation.SharedKernel.Outbox;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -20,6 +21,8 @@ public static class MessagingModule
         services.AddScoped<IOutboxStore>(sp => sp.GetRequiredService<MessagingDbContext>());
 
         services.AddScoped<SendPolicyGate>();
+        services.AddScoped<IMessageSender, MessageSenderAdapter>();
+        services.AddScoped<IMessageStatsProvider, MessageStatsProvider>();
 
         // Default dev senders — one per channel. Swap for SendGrid/Twilio/FCM/SMTP later.
         foreach (var channel in new[] { Channel.Email, Channel.Sms, Channel.Push, Channel.WhatsApp })

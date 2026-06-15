@@ -16,6 +16,7 @@ public static class ContactsModule
             options.UseNpgsql(configuration.GetConnectionString("Postgres")));
         services.AddScoped<IOutboxStore>(sp => sp.GetRequiredService<ContactsDbContext>());
         services.AddScoped<ISuppressionChecker, SuppressionChecker>();
+        services.AddScoped<IAudienceResolver, AudienceResolver>();
 
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<ContactsModuleMarker>());
         services.AddValidatorsFromAssemblyContaining<ContactsModuleMarker>();
