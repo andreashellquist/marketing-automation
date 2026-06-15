@@ -6,18 +6,25 @@ modular monolith with a React frontend.
 
 ## Status
 
-**Phase 1 (foundation) — in progress.** Solution scaffolded; tenancy, transactional
-outbox, messaging bus, observability and CI are in place. See
-[docs/SPECIFICATION.md](docs/SPECIFICATION.md) for the full architecture and build order.
+**Phases 1–2 in progress.** Foundation, the Contacts CDP, and Event ingestion are
+built and tested. See [docs/SPECIFICATION.md](docs/SPECIFICATION.md) for the full
+architecture and build order.
 
 What's built:
 - Modular-monolith solution: 10 module projects + shared kernel + API host
-- `SharedKernel`: Guid v7 entities, domain/integration event contracts, tenant context
-- `Platform` module: multi-tenant `DbContext` (global query filters, soft delete,
-  audit fields), **transactional outbox** + relay to the bus, tenant-resolution middleware
-- MassTransit/RabbitMQ wiring, Serilog → Seq, health checks, OpenAPI
-- Initial EF Core migration (PostgreSQL, `platform` schema)
-- Tests: 20 NetArchTest module-boundary tests + 4 tenancy/outbox tests (SQLite in-memory)
+- `SharedKernel`: Guid v7 entities, domain/integration event contracts, tenant context,
+  reusable `ModuleDbContext` base (tenant filter, soft delete, audit, outbox flush),
+  MediatR validation behavior, `Channel`/`IdentifierType` primitives
+- `Platform`: multi-tenant `DbContext`, **transactional outbox** + background relay
+  draining every module's outbox, tenant-resolution middleware
+- `Contacts` (CDP): unified profiles with JSONB custom attributes, **deterministic
+  identity resolution** with anonymous→known merge, append-only **consent ledger**,
+  cross-channel **suppression** (revoking marketing consent suppresses automatically)
+- `Events`: idempotent **event ingestion** (single + batch) deduped by message id,
+  publishing `EventIngested` for downstream fan-out — with no dependency on Contacts
+- MassTransit/RabbitMQ, Serilog → Seq, health checks, OpenAPI, ProblemDetails
+- EF Core migrations (PostgreSQL) for `platform`, `contacts`, `events` schemas
+- **36 tests**: 20 arch-boundary + 5 platform + 6 contacts + 5 events (SQLite in-memory)
 - GitHub Actions CI (build + test on every push/PR)
 
 ## Stack

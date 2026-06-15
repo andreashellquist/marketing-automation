@@ -1,3 +1,5 @@
+using MarketingAutomation.SharedKernel;
+
 namespace MarketingAutomation.Modules.Contacts.Domain;
 
 /// <summary>
