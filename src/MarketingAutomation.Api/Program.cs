@@ -1,5 +1,10 @@
+using MarketingAutomation.Api;
+using MarketingAutomation.Modules.Contacts;
+using MarketingAutomation.Modules.Contacts.Endpoints;
+using MarketingAutomation.Modules.Contacts.Infrastructure;
 using MarketingAutomation.Modules.Platform;
 using MarketingAutomation.Modules.Platform.Infrastructure;
+using MarketingAutomation.SharedKernel.Application;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 
@@ -12,8 +17,12 @@ builder.Host.UseSerilog((context, config) => config
     .WriteTo.Seq(context.Configuration["Seq:Url"] ?? "http://localhost:5341"));
 
 builder.Services.AddPlatformModule(builder.Configuration);
+builder.Services.AddContactsModule(builder.Configuration);
+builder.Services.AddSharedApplication();
+
 builder.Services.AddOpenApi();
 builder.Services.AddProblemDetails();
+builder.Services.AddExceptionHandler<ProblemDetailsExceptionHandler>();
 builder.Services.AddHealthChecks()
     .AddDbContextCheck<PlatformDbContext>("postgres");
 
@@ -23,6 +32,7 @@ if (app.Environment.IsDevelopment())
 {
     using var scope = app.Services.CreateScope();
     await scope.ServiceProvider.GetRequiredService<PlatformDbContext>().Database.MigrateAsync();
+    await scope.ServiceProvider.GetRequiredService<ContactsDbContext>().Database.MigrateAsync();
 }
 
 app.UseExceptionHandler();
@@ -32,6 +42,7 @@ app.UseMiddleware<TenantResolutionMiddleware>();
 app.MapOpenApi();
 app.MapHealthChecks("/health");
 app.MapGet("/", () => Results.Ok(new { service = "marketing-automation", status = "ok" }));
+app.MapContactsEndpoints();
 
 app.Run();
 

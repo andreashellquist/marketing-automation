@@ -1,8 +1,10 @@
-namespace MarketingAutomation.Modules.Platform.Infrastructure.Outbox;
+namespace MarketingAutomation.SharedKernel.Outbox;
 
 /// <summary>
 /// Transactional outbox row. Written in the same transaction as the state change
-/// that caused it; relayed to the message bus by <see cref="OutboxProcessor"/>.
+/// that caused it; relayed to the message bus by a background processor. Each module
+/// owns its own outbox table (in its schema) so the write is always atomic with the
+/// module's domain changes.
 /// </summary>
 public sealed class OutboxMessage
 {

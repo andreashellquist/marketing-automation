@@ -15,7 +15,7 @@ namespace MarketingAutomation.Modules.Platform.Infrastructure.Migrations
                 name: "platform");
 
             migrationBuilder.CreateTable(
-                name: "OutboxMessages",
+                name: "outbox_messages",
                 schema: "platform",
                 columns: table => new
                 {
@@ -30,11 +30,11 @@ namespace MarketingAutomation.Modules.Platform.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_OutboxMessages", x => x.Id);
+                    table.PrimaryKey("PK_outbox_messages", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
-                name: "Tenants",
+                name: "tenants",
                 schema: "platform",
                 columns: table => new
                 {
@@ -48,20 +48,20 @@ namespace MarketingAutomation.Modules.Platform.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Tenants", x => x.Id);
+                    table.PrimaryKey("PK_tenants", x => x.Id);
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_OutboxMessages_ProcessedAt",
+                name: "IX_outbox_messages_ProcessedAt",
                 schema: "platform",
-                table: "OutboxMessages",
+                table: "outbox_messages",
                 column: "ProcessedAt",
                 filter: "\"ProcessedAt\" IS NULL");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Tenants_Slug",
+                name: "IX_tenants_Slug",
                 schema: "platform",
-                table: "Tenants",
+                table: "tenants",
                 column: "Slug",
                 unique: true);
         }
@@ -70,11 +70,11 @@ namespace MarketingAutomation.Modules.Platform.Infrastructure.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "OutboxMessages",
+                name: "outbox_messages",
                 schema: "platform");
 
             migrationBuilder.DropTable(
-                name: "Tenants",
+                name: "tenants",
                 schema: "platform");
         }
     }

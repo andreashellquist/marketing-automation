@@ -1,5 +1,5 @@
+using MarketingAutomation.Modules.Platform.Domain;
 using MarketingAutomation.Modules.Platform.Infrastructure;
-using MarketingAutomation.Modules.Platform.Infrastructure.Outbox;
 using MarketingAutomation.SharedKernel;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
@@ -66,14 +66,15 @@ public class TenancyAndOutboxTests : IDisposable
     }
 
     [Fact]
-    public async Task Outbox_enqueue_persists_event_in_same_transaction()
+    public async Task Raised_integration_event_is_flushed_to_outbox_atomically()
     {
         var tenantId = Guid.CreateVersion7();
         _tenantContext.Set(tenantId);
         await using var db = CreateContext();
-        var outbox = new EfOutbox(db);
 
-        outbox.Enqueue(new TestEvent(Guid.CreateVersion7(), tenantId, DateTimeOffset.UtcNow, "hello"));
+        var tenant = new Tenant { Name = "Acme", Slug = "acme" };
+        tenant.RaiseIntegrationEvent(new TestEvent(Guid.CreateVersion7(), tenantId, DateTimeOffset.UtcNow, "hello"));
+        db.Tenants.Add(tenant);
         await db.SaveChangesAsync();
 
         var message = await db.OutboxMessages.SingleAsync();
@@ -81,6 +82,29 @@ public class TenancyAndOutboxTests : IDisposable
         Assert.Null(message.ProcessedAt);
         Assert.Contains("hello", message.Payload);
         Assert.Contains(nameof(TestEvent), message.EventType);
+        // event list is cleared after flush so a second save won't duplicate it
+        Assert.Empty(tenant.IntegrationEvents);
+    }
+
+    [Fact]
+    public async Task Outbox_store_fetches_only_unprocessed_messages()
+    {
+        var tenantId = Guid.CreateVersion7();
+        _tenantContext.Set(tenantId);
+        await using var db = CreateContext();
+
+        var tenant = new Tenant { Name = "Acme", Slug = "acme" };
+        tenant.RaiseIntegrationEvent(new TestEvent(Guid.CreateVersion7(), tenantId, DateTimeOffset.UtcNow, "first"));
+        db.Tenants.Add(tenant);
+        await db.SaveChangesAsync();
+
+        var pending = await db.FetchPendingAsync(10, 10, CancellationToken.None);
+        Assert.Single(pending);
+
+        pending[0].ProcessedAt = DateTimeOffset.UtcNow;
+        await db.SaveOutboxAsync(CancellationToken.None);
+
+        Assert.Empty(await db.FetchPendingAsync(10, 10, CancellationToken.None));
     }
 
     [Fact]

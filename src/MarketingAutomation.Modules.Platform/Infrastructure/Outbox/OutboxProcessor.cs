@@ -1,5 +1,5 @@
+using MarketingAutomation.SharedKernel.Outbox;
 using MassTransit;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -7,9 +7,9 @@ using Microsoft.Extensions.Logging;
 namespace MarketingAutomation.Modules.Platform.Infrastructure.Outbox;
 
 /// <summary>
-/// Polls the outbox and relays pending messages to the bus. Rows are claimed with
-/// FOR UPDATE SKIP LOCKED semantics via the ordered batch + immediate ProcessedAt
-/// update, so multiple instances can run safely.
+/// Drains every module's outbox and relays pending messages to the bus. Resolves all
+/// registered <see cref="IOutboxStore"/> implementations (one per module DbContext),
+/// so new modules are picked up just by registering their context as a store.
 /// </summary>
 public sealed class OutboxProcessor(IServiceScopeFactory scopeFactory, ILogger<OutboxProcessor> logger)
     : BackgroundService
@@ -24,53 +24,50 @@ public sealed class OutboxProcessor(IServiceScopeFactory scopeFactory, ILogger<O
         {
             try
             {
-                await ProcessBatchAsync(stoppingToken);
+                await ProcessAllStoresAsync(stoppingToken);
             }
             catch (Exception ex) when (ex is not OperationCanceledException)
             {
-                logger.LogError(ex, "Outbox batch failed");
+                logger.LogError(ex, "Outbox processing failed");
             }
 
             await Task.Delay(PollInterval, stoppingToken);
         }
     }
 
-    private async Task ProcessBatchAsync(CancellationToken ct)
+    private async Task ProcessAllStoresAsync(CancellationToken ct)
     {
         using var scope = scopeFactory.CreateScope();
-        var db = scope.ServiceProvider.GetRequiredService<PlatformDbContext>();
         var publisher = scope.ServiceProvider.GetRequiredService<IPublishEndpoint>();
+        var stores = scope.ServiceProvider.GetServices<IOutboxStore>();
 
-        var pending = await db.OutboxMessages
-            .Where(m => m.ProcessedAt == null && m.AttemptCount < MaxAttempts)
-            .OrderBy(m => m.OccurredAt)
-            .Take(BatchSize)
-            .ToListAsync(ct);
-
-        foreach (var message in pending)
+        foreach (var store in stores)
         {
-            try
-            {
-                var eventType = Type.GetType(message.EventType)
-                    ?? throw new InvalidOperationException($"Unknown event type '{message.EventType}'.");
-                var @event = System.Text.Json.JsonSerializer.Deserialize(message.Payload, eventType)
-                    ?? throw new InvalidOperationException("Outbox payload deserialized to null.");
+            var pending = await store.FetchPendingAsync(BatchSize, MaxAttempts, ct);
+            if (pending.Count == 0) continue;
 
-                await publisher.Publish(@event, eventType, ct);
-                message.ProcessedAt = DateTimeOffset.UtcNow;
-            }
-            catch (Exception ex) when (ex is not OperationCanceledException)
+            foreach (var message in pending)
             {
-                message.AttemptCount++;
-                message.LastError = ex.Message;
-                logger.LogWarning(ex, "Outbox message {MessageId} failed (attempt {Attempt})",
-                    message.Id, message.AttemptCount);
-            }
-        }
+                try
+                {
+                    var eventType = Type.GetType(message.EventType)
+                        ?? throw new InvalidOperationException($"Unknown event type '{message.EventType}'.");
+                    var @event = System.Text.Json.JsonSerializer.Deserialize(message.Payload, eventType)
+                        ?? throw new InvalidOperationException("Outbox payload deserialized to null.");
 
-        if (pending.Count > 0)
-        {
-            await db.SaveChangesAsync(ct);
+                    await publisher.Publish(@event, eventType, ct);
+                    message.ProcessedAt = DateTimeOffset.UtcNow;
+                }
+                catch (Exception ex) when (ex is not OperationCanceledException)
+                {
+                    message.AttemptCount++;
+                    message.LastError = ex.Message;
+                    logger.LogWarning(ex, "Outbox message {MessageId} failed (attempt {Attempt})",
+                        message.Id, message.AttemptCount);
+                }
+            }
+
+            await store.SaveOutboxAsync(ct);
         }
     }
 }

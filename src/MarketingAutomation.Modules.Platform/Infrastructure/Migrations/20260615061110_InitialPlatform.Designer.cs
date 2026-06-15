@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace MarketingAutomation.Modules.Platform.Infrastructure.Migrations
 {
     [DbContext(typeof(PlatformDbContext))]
-    [Migration("20260614202424_InitialPlatform")]
+    [Migration("20260615061110_InitialPlatform")]
     partial class InitialPlatform
     {
         /// <inheritdoc />
@@ -29,7 +29,6 @@ namespace MarketingAutomation.Modules.Platform.Infrastructure.Migrations
             modelBuilder.Entity("MarketingAutomation.Modules.Platform.Domain.Tenant", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
                     b.Property<DateTimeOffset>("CreatedAt")
@@ -59,13 +58,12 @@ namespace MarketingAutomation.Modules.Platform.Infrastructure.Migrations
                     b.HasIndex("Slug")
                         .IsUnique();
 
-                    b.ToTable("Tenants", "platform");
+                    b.ToTable("tenants", "platform");
                 });
 
-            modelBuilder.Entity("MarketingAutomation.Modules.Platform.Infrastructure.Outbox.OutboxMessage", b =>
+            modelBuilder.Entity("MarketingAutomation.SharedKernel.Outbox.OutboxMessage", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
                     b.Property<int>("AttemptCount")
@@ -97,7 +95,7 @@ namespace MarketingAutomation.Modules.Platform.Infrastructure.Migrations
                     b.HasIndex("ProcessedAt")
                         .HasFilter("\"ProcessedAt\" IS NULL");
 
-                    b.ToTable("OutboxMessages", "platform");
+                    b.ToTable("outbox_messages", "platform");
                 });
 #pragma warning restore 612, 618
         }

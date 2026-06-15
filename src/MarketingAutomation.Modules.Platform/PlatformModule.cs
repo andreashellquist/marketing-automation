@@ -1,6 +1,7 @@
 using MarketingAutomation.Modules.Platform.Infrastructure;
 using MarketingAutomation.Modules.Platform.Infrastructure.Outbox;
 using MarketingAutomation.SharedKernel;
+using MarketingAutomation.SharedKernel.Outbox;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -17,8 +18,8 @@ public static class PlatformModule
 
         services.AddDbContext<PlatformDbContext>(options =>
             options.UseNpgsql(configuration.GetConnectionString("Postgres")));
+        services.AddScoped<IOutboxStore>(sp => sp.GetRequiredService<PlatformDbContext>());
 
-        services.AddScoped<IOutbox, EfOutbox>();
         services.AddHostedService<OutboxProcessor>();
 
         services.AddMassTransit(bus =>

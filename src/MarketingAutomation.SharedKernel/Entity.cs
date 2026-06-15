@@ -9,9 +9,18 @@ public abstract class Entity
     public bool IsDeleted { get; set; }
 
     private readonly List<IDomainEvent> _domainEvents = [];
+    private readonly List<IIntegrationEvent> _integrationEvents = [];
+
+    /// <summary>In-process events, dispatched via MediatR within the same scope.</summary>
     public IReadOnlyList<IDomainEvent> DomainEvents => _domainEvents;
+
+    /// <summary>Cross-module events, flushed to the transactional outbox on save.</summary>
+    public IReadOnlyList<IIntegrationEvent> IntegrationEvents => _integrationEvents;
+
     public void Raise(IDomainEvent domainEvent) => _domainEvents.Add(domainEvent);
+    public void RaiseIntegrationEvent(IIntegrationEvent integrationEvent) => _integrationEvents.Add(integrationEvent);
     public void ClearDomainEvents() => _domainEvents.Clear();
+    public void ClearIntegrationEvents() => _integrationEvents.Clear();
 }
 
 /// <summary>Entity scoped to a tenant. Global query filters enforce isolation.</summary>
