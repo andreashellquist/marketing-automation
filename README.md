@@ -6,10 +6,10 @@ modular monolith with a React frontend.
 
 ## Status
 
-**Phases 1–5 in progress.** Foundation, the Contacts CDP, Event ingestion, the
-Messaging pipeline, Campaigns, and Segments (with the AI natural-language builder) are
-built and tested. See [docs/SPECIFICATION.md](docs/SPECIFICATION.md) for the full
-architecture and build order.
+**Phases 1–6 in progress.** Foundation, the Contacts CDP, Event ingestion, the
+Messaging pipeline, Campaigns, Segments (with the AI natural-language builder), and the
+durable Journey engine are built and tested. See
+[docs/SPECIFICATION.md](docs/SPECIFICATION.md) for the full architecture and build order.
 
 What's built:
 - Modular-monolith solution: 10 module projects + shared kernel + API host
@@ -44,11 +44,17 @@ What's built:
 - `Ai`: **natural-language → segment** via the Claude API (official `Anthropic` .NET SDK,
   `claude-opus-4-8`) behind the `ISegmentAiBuilder` contract — `POST /segments/from-text`
   returns a draft AST for confirmation in the visual builder. AI output is always a draft.
+- `Journeys`: a **durable journey engine** — a versioned graph (send / wait / wait-for-event
+  / A-B split / exit) executed as a table-driven state machine. Runs are persisted state with
+  **wake-ups on disk** (not in-memory timers), so a restart loses nothing: a background
+  scheduler re-discovers due time-waits and incoming events resume parked runs (or take the
+  timeout branch). At-most-once sends per (run, node); re-entry policy; version pinned per run.
+  Sends through the Messaging pipeline via `IMessageSender` — references no other module.
 - MassTransit/RabbitMQ, Serilog → Seq, health checks, OpenAPI, ProblemDetails
 - EF Core migrations (PostgreSQL) for `platform`, `contacts`, `events`, `messaging`,
-  `campaigns`, `segments` schemas
-- **65 tests**: 20 arch-boundary + 5 platform + 6 contacts + 5 events + 12 messaging
-  + 7 campaigns + 10 segments
+  `campaigns`, `segments`, `journeys` schemas
+- **71 tests**: 20 arch-boundary + 5 platform + 6 contacts + 5 events + 12 messaging
+  + 7 campaigns + 10 segments + 6 journeys
 - GitHub Actions CI (build + test on every push/PR)
 
 ## Stack
