@@ -8,10 +8,14 @@ using MarketingAutomation.Modules.Contacts.Infrastructure;
 using MarketingAutomation.Modules.Events;
 using MarketingAutomation.Modules.Events.Endpoints;
 using MarketingAutomation.Modules.Events.Infrastructure;
+using MarketingAutomation.Modules.Ai;
 using MarketingAutomation.Modules.Messaging;
 using MarketingAutomation.Modules.Messaging.Endpoints;
 using MarketingAutomation.Modules.Messaging.Infrastructure;
 using MarketingAutomation.Modules.Platform;
+using MarketingAutomation.Modules.Segments;
+using MarketingAutomation.Modules.Segments.Endpoints;
+using MarketingAutomation.Modules.Segments.Infrastructure;
 using MarketingAutomation.Modules.Platform.Infrastructure;
 using MarketingAutomation.SharedKernel.Application;
 using Microsoft.EntityFrameworkCore;
@@ -30,6 +34,8 @@ builder.Services.AddContactsModule(builder.Configuration);
 builder.Services.AddEventsModule(builder.Configuration);
 builder.Services.AddMessagingModule(builder.Configuration);
 builder.Services.AddCampaignsModule(builder.Configuration);
+builder.Services.AddSegmentsModule(builder.Configuration);
+builder.Services.AddAiModule(builder.Configuration);
 builder.Services.AddSharedApplication();
 
 builder.Services.AddOpenApi();
@@ -48,6 +54,7 @@ if (app.Environment.IsDevelopment())
     await scope.ServiceProvider.GetRequiredService<EventsDbContext>().Database.MigrateAsync();
     await scope.ServiceProvider.GetRequiredService<MessagingDbContext>().Database.MigrateAsync();
     await scope.ServiceProvider.GetRequiredService<CampaignsDbContext>().Database.MigrateAsync();
+    await scope.ServiceProvider.GetRequiredService<SegmentsDbContext>().Database.MigrateAsync();
 }
 
 app.UseExceptionHandler();
@@ -61,6 +68,7 @@ app.MapContactsEndpoints();
 app.MapEventsEndpoints();
 app.MapMessagingEndpoints();
 app.MapCampaignsEndpoints();
+app.MapSegmentsEndpoints();
 
 app.Run();
 

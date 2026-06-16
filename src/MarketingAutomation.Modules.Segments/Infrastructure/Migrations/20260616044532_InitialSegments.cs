@@ -3,20 +3,20 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace MarketingAutomation.Modules.Events.Infrastructure.Migrations
+namespace MarketingAutomation.Modules.Segments.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialEvents : Migration
+    public partial class InitialSegments : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.EnsureSchema(
-                name: "events");
+                name: "segments");
 
             migrationBuilder.CreateTable(
                 name: "outbox_messages",
-                schema: "events",
+                schema: "segments",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -34,17 +34,16 @@ namespace MarketingAutomation.Modules.Events.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "stored_events",
-                schema: "events",
+                name: "segments",
+                schema: "segments",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Name = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
-                    IdentifierType = table.Column<int>(type: "integer", nullable: false),
-                    IdentifierValue = table.Column<string>(type: "character varying(320)", maxLength: 320, nullable: false),
-                    OccurredAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    Properties = table.Column<string>(type: "jsonb", nullable: false),
-                    MessageId = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: true),
+                    Type = table.Column<int>(type: "integer", nullable: false),
+                    Definition = table.Column<string>(type: "jsonb", nullable: false),
+                    CachedCount = table.Column<long>(type: "bigint", nullable: true),
+                    CachedCountAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
                     CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     UpdatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     IsDeleted = table.Column<bool>(type: "boolean", nullable: false),
@@ -52,41 +51,21 @@ namespace MarketingAutomation.Modules.Events.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_stored_events", x => x.Id);
+                    table.PrimaryKey("PK_segments", x => x.Id);
                 });
 
             migrationBuilder.CreateIndex(
                 name: "IX_outbox_messages_ProcessedAt",
-                schema: "events",
+                schema: "segments",
                 table: "outbox_messages",
                 column: "ProcessedAt",
                 filter: "\"ProcessedAt\" IS NULL");
 
             migrationBuilder.CreateIndex(
-                name: "IX_stored_events_IdentifierType_IdentifierValue_OccurredAt",
-                schema: "events",
-                table: "stored_events",
-                columns: new[] { "IdentifierType", "IdentifierValue", "OccurredAt" });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_stored_events_Name_OccurredAt",
-                schema: "events",
-                table: "stored_events",
-                columns: new[] { "Name", "OccurredAt" });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_stored_events_TenantId",
-                schema: "events",
-                table: "stored_events",
+                name: "IX_segments_TenantId",
+                schema: "segments",
+                table: "segments",
                 column: "TenantId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_stored_events_TenantId_MessageId",
-                schema: "events",
-                table: "stored_events",
-                columns: new[] { "TenantId", "MessageId" },
-                unique: true,
-                filter: "\"MessageId\" IS NOT NULL");
         }
 
         /// <inheritdoc />
@@ -94,11 +73,11 @@ namespace MarketingAutomation.Modules.Events.Infrastructure.Migrations
         {
             migrationBuilder.DropTable(
                 name: "outbox_messages",
-                schema: "events");
+                schema: "segments");
 
             migrationBuilder.DropTable(
-                name: "stored_events",
-                schema: "events");
+                name: "segments",
+                schema: "segments");
         }
     }
 }

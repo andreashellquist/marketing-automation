@@ -1,6 +1,7 @@
 using FluentValidation;
 using MarketingAutomation.Modules.Events.Infrastructure;
 using MarketingAutomation.SharedKernel.Outbox;
+using MarketingAutomation.SharedKernel.Segments;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,6 +15,7 @@ public static class EventsModule
         services.AddDbContext<EventsDbContext>(options =>
             options.UseNpgsql(configuration.GetConnectionString("Postgres")));
         services.AddScoped<IOutboxStore>(sp => sp.GetRequiredService<EventsDbContext>());
+        services.AddScoped<IEventAudienceQuery, EventAudienceQuery>();
 
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<EventsModuleMarker>());
         services.AddValidatorsFromAssemblyContaining<EventsModuleMarker>();

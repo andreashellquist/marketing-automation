@@ -13,6 +13,10 @@ public sealed class StoredEvent : TenantEntity
     public IdentifierType IdentifierType { get; set; }
     public required string IdentifierValue { get; set; }
     public DateTimeOffset OccurredAt { get; set; }
+
+    /// <summary>UTC ticks mirror of <see cref="OccurredAt"/> for provider-portable range
+    /// queries (segment event windows), since SQLite can't range-query DateTimeOffset.</summary>
+    public long OccurredAtTicks { get; set; }
     public Dictionary<string, object?> Properties { get; set; } = new();
 
     /// <summary>Client-supplied dedup key; unique per tenant when present.</summary>

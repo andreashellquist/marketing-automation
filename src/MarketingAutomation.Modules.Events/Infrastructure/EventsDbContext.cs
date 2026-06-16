@@ -40,8 +40,9 @@ public sealed class EventsDbContext(DbContextOptions<EventsDbContext> options, I
                 .IsUnique()
                 .HasFilter("\"MessageId\" IS NOT NULL");
             // Common access path: a person's events by recency.
-            b.HasIndex(e => new { e.IdentifierType, e.IdentifierValue, e.OccurredAt });
-            b.HasIndex(e => new { e.Name, e.OccurredAt });
+            b.HasIndex(e => new { e.IdentifierType, e.IdentifierValue, e.OccurredAtTicks });
+            // Segment event windows group by name over a time window.
+            b.HasIndex(e => new { e.Name, e.OccurredAtTicks });
         });
 
         base.OnModelCreating(modelBuilder);

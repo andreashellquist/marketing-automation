@@ -6,9 +6,10 @@ modular monolith with a React frontend.
 
 ## Status
 
-**Phases 1–4 in progress.** Foundation, the Contacts CDP, Event ingestion, the
-Messaging pipeline, and Campaigns are built and tested. See
-[docs/SPECIFICATION.md](docs/SPECIFICATION.md) for the full architecture and build order.
+**Phases 1–5 in progress.** Foundation, the Contacts CDP, Event ingestion, the
+Messaging pipeline, Campaigns, and Segments (with the AI natural-language builder) are
+built and tested. See [docs/SPECIFICATION.md](docs/SPECIFICATION.md) for the full
+architecture and build order.
 
 What's built:
 - Modular-monolith solution: 10 module projects + shared kernel + API host
@@ -35,11 +36,19 @@ What's built:
   member), test sends (transactional, QA-only), and **delivery stats**. Drives sends and
   audience via SharedKernel contracts (`IAudienceResolver`, `IMessageSender`,
   `IMessageStatsProvider`) — references no other module.
+- `Segments`: a JSON-AST audience builder (standard fields, custom attributes, behavioral
+  events, AND/OR/NOT nesting), CRUD + live preview, and an evaluator that finally makes
+  `IAudienceResolver` resolve a real `segmentId`. The AST and evaluation cross module
+  boundaries via SharedKernel contracts: Contacts implements `ISegmentEvaluator`, Events
+  implements `IEventAudienceQuery` (e.g. "bought twice in 90 days"), Segments composes them.
+- `Ai`: **natural-language → segment** via the Claude API (official `Anthropic` .NET SDK,
+  `claude-opus-4-8`) behind the `ISegmentAiBuilder` contract — `POST /segments/from-text`
+  returns a draft AST for confirmation in the visual builder. AI output is always a draft.
 - MassTransit/RabbitMQ, Serilog → Seq, health checks, OpenAPI, ProblemDetails
 - EF Core migrations (PostgreSQL) for `platform`, `contacts`, `events`, `messaging`,
-  `campaigns` schemas
-- **55 tests**: 20 arch-boundary + 5 platform + 6 contacts + 5 events + 12 messaging
-  + 7 campaigns
+  `campaigns`, `segments` schemas
+- **65 tests**: 20 arch-boundary + 5 platform + 6 contacts + 5 events + 12 messaging
+  + 7 campaigns + 10 segments
 - GitHub Actions CI (build + test on every push/PR)
 
 ## Stack

@@ -2,6 +2,7 @@ using FluentValidation;
 using MarketingAutomation.Modules.Contacts.Infrastructure;
 using MarketingAutomation.SharedKernel.Contracts;
 using MarketingAutomation.SharedKernel.Outbox;
+using MarketingAutomation.SharedKernel.Segments;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -16,7 +17,7 @@ public static class ContactsModule
             options.UseNpgsql(configuration.GetConnectionString("Postgres")));
         services.AddScoped<IOutboxStore>(sp => sp.GetRequiredService<ContactsDbContext>());
         services.AddScoped<ISuppressionChecker, SuppressionChecker>();
-        services.AddScoped<IAudienceResolver, AudienceResolver>();
+        services.AddScoped<ISegmentEvaluator, SegmentEvaluator>();
 
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<ContactsModuleMarker>());
         services.AddValidatorsFromAssemblyContaining<ContactsModuleMarker>();

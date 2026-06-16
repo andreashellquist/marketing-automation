@@ -70,12 +70,14 @@ public sealed class IngestEventsHandler(EventsDbContext db, ITenantContext tenan
         {
             if (input.MessageId is not null && existing.Contains(input.MessageId)) continue;
 
+            var occurredAt = input.OccurredAt ?? DateTimeOffset.UtcNow;
             var stored = new StoredEvent
             {
                 Name = input.Name,
                 IdentifierType = input.IdentifierType,
                 IdentifierValue = input.IdentifierValue,
-                OccurredAt = input.OccurredAt ?? DateTimeOffset.UtcNow,
+                OccurredAt = occurredAt,
+                OccurredAtTicks = occurredAt.UtcTicks,
                 Properties = input.Properties ?? new(),
                 MessageId = input.MessageId,
             };
