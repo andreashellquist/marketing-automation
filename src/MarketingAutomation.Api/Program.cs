@@ -19,6 +19,9 @@ using MarketingAutomation.Modules.Platform;
 using MarketingAutomation.Modules.Segments;
 using MarketingAutomation.Modules.Segments.Endpoints;
 using MarketingAutomation.Modules.Segments.Infrastructure;
+using MarketingAutomation.Modules.Templates;
+using MarketingAutomation.Modules.Templates.Endpoints;
+using MarketingAutomation.Modules.Templates.Infrastructure;
 using MarketingAutomation.Modules.Platform.Infrastructure;
 using MarketingAutomation.SharedKernel.Application;
 using Microsoft.EntityFrameworkCore;
@@ -39,6 +42,7 @@ builder.Services.AddMessagingModule(builder.Configuration);
 builder.Services.AddCampaignsModule(builder.Configuration);
 builder.Services.AddSegmentsModule(builder.Configuration);
 builder.Services.AddJourneysModule(builder.Configuration);
+builder.Services.AddTemplatesModule(builder.Configuration);
 builder.Services.AddAiModule(builder.Configuration);
 builder.Services.AddSharedApplication();
 
@@ -60,6 +64,7 @@ if (app.Environment.IsDevelopment())
     await scope.ServiceProvider.GetRequiredService<CampaignsDbContext>().Database.MigrateAsync();
     await scope.ServiceProvider.GetRequiredService<SegmentsDbContext>().Database.MigrateAsync();
     await scope.ServiceProvider.GetRequiredService<JourneysDbContext>().Database.MigrateAsync();
+    await scope.ServiceProvider.GetRequiredService<TemplatesDbContext>().Database.MigrateAsync();
 }
 
 app.UseExceptionHandler();
@@ -75,6 +80,7 @@ app.MapMessagingEndpoints();
 app.MapCampaignsEndpoints();
 app.MapSegmentsEndpoints();
 app.MapJourneysEndpoints();
+app.MapTemplatesEndpoints();
 
 app.Run();
 

@@ -6,9 +6,9 @@ modular monolith with a React frontend.
 
 ## Status
 
-**Phases 1–6 in progress.** Foundation, the Contacts CDP, Event ingestion, the
-Messaging pipeline, Campaigns, Segments (with the AI natural-language builder), and the
-durable Journey engine are built and tested. See
+**Phases 1–7 in progress.** Foundation, the Contacts CDP, Event ingestion, the
+Messaging pipeline, Campaigns, Segments (with the AI natural-language builder), the
+durable Journey engine, and the Templates rendering engine are built and tested. See
 [docs/SPECIFICATION.md](docs/SPECIFICATION.md) for the full architecture and build order.
 
 What's built:
@@ -50,11 +50,17 @@ What's built:
   scheduler re-discovers due time-waits and incoming events resume parked runs (or take the
   timeout branch). At-most-once sends per (run, node); re-entry policy; version pinned per run.
   Sends through the Messaging pipeline via `IMessageSender` — references no other module.
+- `Templates`: versioned content templates with **Liquid rendering** (Fluid) — merge tags
+  with `default` fallbacks, per-tenant **brand kit** variables, and **pre-send checks**
+  (missing unsubscribe link → hard error, missing subject, fallback-less merge tags, empty
+  links). Renders for the send pipeline via the `ITemplateRenderer` SharedKernel contract;
+  stores the drag-and-drop editor's design JSON alongside compiled HTML. (The visual
+  designer itself is a React/Unlayer frontend that embeds this backend.)
 - MassTransit/RabbitMQ, Serilog → Seq, health checks, OpenAPI, ProblemDetails
 - EF Core migrations (PostgreSQL) for `platform`, `contacts`, `events`, `messaging`,
-  `campaigns`, `segments`, `journeys` schemas
-- **71 tests**: 20 arch-boundary + 5 platform + 6 contacts + 5 events + 12 messaging
-  + 7 campaigns + 10 segments + 6 journeys
+  `campaigns`, `segments`, `journeys`, `templates` schemas
+- **81 tests**: 20 arch-boundary + 5 platform + 6 contacts + 5 events + 12 messaging
+  + 7 campaigns + 10 segments + 6 journeys + 10 templates
 - GitHub Actions CI (build + test on every push/PR)
 
 ## Stack

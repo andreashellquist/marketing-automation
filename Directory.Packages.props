@@ -1,6 +1,7 @@
 <Project>
   <ItemGroup>
     <PackageVersion Include="Anthropic" Version="12.29.1" />
+    <PackageVersion Include="Fluid.Core" Version="2.31.0" />
     <PackageVersion Include="MediatR" Version="12.4.1" />
     <PackageVersion Include="FluentValidation.DependencyInjectionExtensions" Version="11.11.0" />
     <PackageVersion Include="MassTransit.RabbitMQ" Version="8.3.4" />
